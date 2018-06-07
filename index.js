@@ -172,6 +172,7 @@ app.put('/users/:userId', (req, res, next) => {
     req.body.email,
     req.body.firstname,
     req.body.lastname,
+    req.body.password,
     new Date(),
     req.params.userId
   )
