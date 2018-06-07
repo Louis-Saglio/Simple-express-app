@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 8080;
 
 // DATABASE
 db.open('expressapi.db').then(() => {
-  db.run('CREATE TABLE IF NOT EXISTS users (pseudo, email, firstname, lastname, createdAt, updatedAt)')
+  db.run('CREATE TABLE IF NOT EXISTS users (pseudo, email, firstname, lastname, password, id, createdAt, updatedAt)')
     .then(() => {
       console.log('> Database ready')
     }).catch((err) => { // Si on a eu des erreurs
@@ -99,15 +99,15 @@ app.get('/users/add', (req, res, next) => {
 app.get('/users/:userId/edit', (req, res, next) => {
   res.format({
     html: () => {
-      db.get('SELECT * FROM users WHERE ROWID = ?', req.params.userId)
-      .then((user) => {
-        if (!user) next()
-        res.render('users/edit', {
-          title: 'Editer un utilisateur',
-          user: user,
-          action: '/users/' + req.params.userId + '?_method=put',
+      db.get('SELECT * FROM users WHERE id = ?', req.params.userId)
+        .then((user) => {
+          if (!user) next();
+          res.render('users/edit', {
+            title: 'Editer un utilisateur',
+            user: user,
+            action: '/users/' + req.params.userId + '?_method=put',
+          })
         })
-      })
     },
     json: () => {
       next(new Error('Bad request'))
@@ -117,31 +117,33 @@ app.get('/users/:userId/edit', (req, res, next) => {
 
 // GET USER BY ID
 app.get('/users/:userId', (req, res, next) => {
-  db.get('SELECT * FROM users WHERE ROWID = ?', req.params.userId)
-  .then((user) => {
-    res.format({
-      html: () => { res.render('users/show', { user: user }) },
-      json: () => { res.status(201).send({message: 'success'}) }
-    })
-  }).catch(next)
-})
+  db.get('SELECT * FROM users WHERE id = ?', req.params.userId)
+    .then((user) => {
+      res.format({
+        html: () => { res.render('users/show', { user: user }) },
+        json: () => { res.status(201).send({message: 'success'}) }
+      })
+    }).catch(next)
+});
 
 // POST USER
 app.post('/users', (req, res, next) => {
-  if(!req.body.pseudo || !req.body.email || !req.body.firstname || !req.body.lastname) {
+  console.log(req.body);
+  if(!req.body.pseudo || !req.body.email || !req.body.firstname || !req.body.lastname || !req.body.password || !req.body.userId) {
     next(new Error('All fields must be given.'))
   }
 
   db.run(
-    "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     req.body.pseudo,
     req.body.email,
     req.body.firstname,
     req.body.lastname,
+    req.body.password,
+    req.body.userId,
     new Date(),
     null
-  )
-    .then(() => {
+  ).then(() => {
       res.format({
         html: () => { res.redirect('/users') },
         json: () => { res.status(201).send({message: 'success'}) }
@@ -151,7 +153,7 @@ app.post('/users', (req, res, next) => {
 
 // DELETE USER
 app.delete('/users/:userId', (req, res, next) => {
-  db.run('DELETE FROM users WHERE ROWID = ?', req.params.userId)
+  db.run('DELETE FROM users WHERE id = ?', req.params.userId)
     .then(() => {
       res.format({
         html: () => { res.redirect('/users') },
@@ -162,7 +164,15 @@ app.delete('/users/:userId', (req, res, next) => {
 
 // UPDATE USER
 app.put('/users/:userId', (req, res, next) => {
-  db.run("UPDATE users SET pseudo = ?, email = ?, firstname = ?, lastname = ?, updatedAt= ? WHERE rowid = ?",req.body.pseudo, req.body.email, req.body.firstname, req.body.lastname, new Date(), req.params.userId)
+  db.run(
+    "UPDATE users SET pseudo = ?, email = ?, firstname = ?, lastname = ?, password = ?, updatedAt= ? WHERE id = ?",
+    req.body.pseudo,
+    req.body.email,
+    req.body.firstname,
+    req.body.lastname,
+    new Date(),
+    req.params.userId
+  )
     .then(() => {
       res.format({
         html: () => { res.redirect('/users') },
