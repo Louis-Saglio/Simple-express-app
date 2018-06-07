@@ -1,6 +1,7 @@
 const db = require('sqlite');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const hat = require('hat');
 
 const express = require('express');
 const app = express();
@@ -129,8 +130,9 @@ app.get('/users/:userId', (req, res, next) => {
 // POST USER
 app.post('/users', (req, res, next) => {
   console.log(req.body);
-  if(!req.body.pseudo || !req.body.email || !req.body.firstname || !req.body.lastname || !req.body.password || !req.body.userId) {
-    next(new Error('All fields must be given.'))
+  if(!req.body.pseudo || !req.body.email || !req.body.firstname || !req.body.lastname || !req.body.password) {
+    next(new Error('All fields must be given.'));
+    return
   }
 
   db.run(
@@ -140,7 +142,7 @@ app.post('/users', (req, res, next) => {
     req.body.firstname,
     req.body.lastname,
     req.body.password,
-    req.body.userId,
+    hat(),
     new Date(),
     null
   ).then(() => {
