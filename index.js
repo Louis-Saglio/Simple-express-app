@@ -2,6 +2,7 @@ const db = require('sqlite');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const hat = require('hat');
+const bcrypt = require('bcrypt');
 
 const express = require('express');
 const app = express();
@@ -135,17 +136,19 @@ app.post('/users', (req, res, next) => {
     return
   }
 
-  db.run(
-    "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    req.body.pseudo,
-    req.body.email,
-    req.body.firstname,
-    req.body.lastname,
-    req.body.password,
-    hat(),
-    new Date(),
-    null
-  ).then(() => {
+  bcrypt.hash(req.body.password, 10).then((password) => {
+    return db.run(
+      "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      req.body.pseudo,
+      req.body.email,
+      req.body.firstname,
+      req.body.lastname,
+      password,
+      hat(),
+      new Date(),
+      null
+    )
+  }).then(() => {
       res.format({
         html: () => { res.redirect('/users') },
         json: () => { res.status(201).send({message: 'success'}) }
