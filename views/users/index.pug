@@ -1,0 +1,15 @@
+h3 Liste des utilisateurs
+
+table(border=1)
+  tr
+    th Pseudo
+    th Firstname
+    th Lastname
+    th Email
+
+  each user in users
+    tr
+      td= user.pseudo
+      td= user.firstname
+      td= user.lastname
+      td= user.email

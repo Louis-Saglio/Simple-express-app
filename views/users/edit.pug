@@ -1,0 +1,7 @@
+h2= title
+form(action=action method="post")
+  input(name="pseudo" type="text" value=user.pseudo placeholder="pseudo")
+  input(name="email" type="email" value=user.email placeholder="email")
+  input(name="firstname" type="text" value=user.firstname placeholder="firstname")
+  input(name="lastname" type="text" value=user.lastname placeholder="lastname")
+  button.btn.btn-info.btn-block.login(type="submit") Envoyer
