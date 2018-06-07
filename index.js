@@ -11,8 +11,11 @@ const PORT = process.env.PORT || 8080;
 
 // DATABASE
 db.open('expressapi.db').then(() => {
-  db.run('CREATE TABLE IF NOT EXISTS users (pseudo, email, firstname, lastname, password, id, createdAt, updatedAt)')
-    .then(() => {
+  const dbActions = [
+    db.run('CREATE TABLE IF NOT EXISTS users (pseudo, email, firstname, lastname, password, id, createdAt, updatedAt)'),
+    db.run('CREATE TABLE IF NOT EXISTS sessions (userId, accessToken, createdAt, expiresAt)')
+  ];
+  Promise.all(dbActions).then(() => {
       console.log('> Database ready')
     }).catch((err) => { // Si on a eu des erreurs
     console.error('ERR> ', err)
