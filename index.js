@@ -206,10 +206,37 @@ app.get('/sessions/', (req, res, next) => {
   res.format({
     html: () => {
       res.render('sessions/login', {
-        title: 'Login'
+        title: 'Login',
+        action: '/sessions/'
       })
     }
   })
+});
+
+app.post('/sessions/', (req, res, next) => {
+  console.log(req.body.userId);
+  db.get(
+    'SELECT password FROM users WHERE id = ?',
+    req.body.userId
+  ).then((user) => {
+    return bcrypt.compare(req.body.password,user.password)
+  }).then((match) => {
+    if (match)
+      return db.run(
+        'INSERT INTO sessions VALUES (?, ?, ?, ?)',
+        req.body.userId,
+        hat(),
+        new Date(),
+        new Date() + 1000 * 60 * 60
+      );
+  }).then(() => { res.send('Done') });
+});
+
+app.post('/sessions/:userId', (req, res, next) => {
+  db.run(
+    'INSERT INTO sessions VALUES (?, ?, ?, ?)',
+
+  )
 });
 
 // ERROR
