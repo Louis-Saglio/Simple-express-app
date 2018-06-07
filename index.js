@@ -202,6 +202,16 @@ app.put('/users/:userId', (req, res, next) => {
     }).catch(next)
 });
 
+app.get('/sessions/', (req, res, next) => {
+  res.format({
+    html: () => {
+      res.render('sessions/login', {
+        title: 'Login'
+      })
+    }
+  })
+});
+
 // ERROR
 app.use((err, req, res, next) => {
   console.log('ERR: ' + err);
