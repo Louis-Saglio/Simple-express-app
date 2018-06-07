@@ -2,6 +2,7 @@ h3 Liste des utilisateurs
 
 table(border=1)
   tr
+    th User id
     th Pseudo
     th Firstname
     th Lastname
@@ -9,6 +10,7 @@ table(border=1)
 
   each user in users
     tr
+      td= user.id
       td= user.pseudo
       td= user.firstname
       td= user.lastname
