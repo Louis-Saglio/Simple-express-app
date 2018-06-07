@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const hat = require('hat');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
 
 const express = require('express');
 const app = express();
@@ -20,6 +21,17 @@ db.open('expressapi.db').then(() => {
 
 app.set('views', './views');
 app.set('view engine', 'pug');
+
+app.set('trust proxy',1);
+app.use(session({
+  secret:'topkek',
+  resave:false,
+  saveUninitialized:true,
+  cookie: {
+    maxAge:1000 * 60 * 60,
+    httpOnly:true
+  }
+}));
 
 // BODY PARSER
 app.use(bodyParser.json());
