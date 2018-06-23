@@ -51,6 +51,44 @@ app.use((req, res, next) => {
   console.log('REQUEST: ' + req.method + ' ' + req.url)
 });
 
+// Authentication
+app.use((req, res, next) => {
+  // WARNING ! You must de athenticated to send requests even DELETE & PUT ones
+  if (req.path === '/sessions/') {
+    return next();
+  }
+  res.format({
+    html: () => {
+      db.all(
+        'SELECT * FROM sessions WHERE accessToken = ? AND expiresAt >= ?',
+        req.session.accessToken,
+        new Date()
+      ).then((data) => {
+        if (data.length > 0) {
+          next()
+        }
+        else {
+          res.redirect('/sessions/')
+        }
+      })
+    },
+    json: () => {
+      db.all(
+        'SELECT * FROM sessions WHERE accessToken = ? AND expiresAt >= ?',
+        req.header('X-AccessToken'),
+        new Date()
+      ).then((data) => {
+        if (data.length > 0) {
+          next()
+        }
+        else {
+          res.send({error: 'Bad token'})
+        }
+      })
+    }
+  })
+});
+
 // DEFAULT ROUTE
 app.get('/', (req, res, next) => {
   res.format({
@@ -244,11 +282,11 @@ app.post('/sessions/', (req, res, next) => {
   }).catch(next)
 });
 
-app.delete('/sessions/:token', (req, res, next) => {
+app.delete('/sessions/', (req, res, next) => {
   console.log(req.params.token);
   db.run(
     'DELETE FROM sessions WHERE accessToken = ?',
-    req.params.token
+    req.session.accessToken
   ).then((data) => {
     console.log(data, 1);
     res.send('Session deleted')
