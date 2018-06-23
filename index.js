@@ -215,21 +215,33 @@ app.get('/sessions/', (req, res, next) => {
 
 app.post('/sessions/', (req, res, next) => {
   console.log(req.body.userId);
+  const token = hat();
   db.get(
     'SELECT password FROM users WHERE id = ?',
     req.body.userId
   ).then((user) => {
     return bcrypt.compare(req.body.password,user.password)
   }).then((match) => {
-    if (match)
+    if (match) {
       return db.run(
         'INSERT INTO sessions VALUES (?, ?, ?, ?)',
         req.body.userId,
-        hat(),
+        token,
         new Date(),
         new Date() + 1000 * 60 * 60
       );
-  }).then(() => { res.send('Done') });
+    }
+  }).then(() => {
+    res.format({
+      html: () => {
+        req.session.accessToken = token;
+        res.send('Authenticated')
+      },
+      json: () => {
+        res.send({accessToken: token});
+      }
+    })
+  }).catch(next)
 });
 
 app.post('/sessions/:userId', (req, res, next) => {
