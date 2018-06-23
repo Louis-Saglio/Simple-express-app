@@ -235,7 +235,7 @@ app.post('/sessions/', (req, res, next) => {
     res.format({
       html: () => {
         req.session.accessToken = token;
-        res.send('Authenticated')
+        res.send('Cookie : ' + token)
       },
       json: () => {
         res.send({accessToken: token});
@@ -244,11 +244,15 @@ app.post('/sessions/', (req, res, next) => {
   }).catch(next)
 });
 
-app.post('/sessions/:userId', (req, res, next) => {
+app.delete('/sessions/:token', (req, res, next) => {
+  console.log(req.params.token);
   db.run(
-    'INSERT INTO sessions VALUES (?, ?, ?, ?)',
-
-  )
+    'DELETE FROM sessions WHERE accessToken = ?',
+    req.params.token
+  ).then((data) => {
+    console.log(data, 1);
+    res.send('Session deleted')
+  }).catch(next)
 });
 
 // ERROR
